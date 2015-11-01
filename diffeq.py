@@ -6,6 +6,8 @@ import scipy.optimize
 import math
 import inspect
 
+cols = ["red", "green", "blue", "orange", "violet"]
+
 def calculate_zeros_of_function(f, lim, tol=1e-3, step=None, n=1e5):
     if step is None:
         step = (lim[1]-lim[0]) / n
@@ -52,25 +54,34 @@ def draw_slope_field(ax, f, t_lim, y_lim, s_len, t_step, y_step):
 
             ax.plot([x1,x2],[y1,y2], 'b', alpha=.4)
 
-def ode_solve(f, ic, t_lim, y_lim, t_del=0.01):
-    f_ode = lambda y,t: [f(y=y[0], t=t)]
+def ode_solve(fs, ics, t_lim, y_lims, t_del=0.01):
+    if type(ics[1]) != list:
+        f_ode = lambda y,t: [fs(y=y[0], t=t)]
+        t0 = ics[0]
+        y0s = [ics[1]]
+        y_lims = [y_lims]
+    else:
+        f_ode = fs
+        t0 = ics[0]
+        y0s = ics[1]
 
-    t0, y0 = ic
     ts_pos = np.arange(t0, t_lim[1]+t_del, step=t_del)
     ts_neg = np.arange(t0, t_lim[0]-t_del, step=-t_del)
     ts = np.append(ts_neg[::-1],ts_pos)
 
     res_pos = scipy.integrate.odeint(
-        f_ode, [y0], ts_pos)
+        f_ode, y0s, ts_pos)
 
     res_neg = scipy.integrate.odeint(
-        f_ode, [y0], ts_neg)
+        f_ode, y0s, ts_neg)
 
-    res = np.append(res_neg[::-1], res_pos)
+    res = np.append(res_neg[::-1], res_pos, axis=0)
 
-    idxs = list(filter(lambda i: res[i] >= y_lim[0] and res[i] <= y_lim[1], range(0,len(res))))
-    res = res[idxs]
-    ts = ts[idxs]
+    for k in range(0,len(y0s)):
+        idxs = list(filter(lambda i: res[i][k] >= y_lims[k][0] and res[i][k] <= y_lims[k][1],
+                           range(0,len(ts))))
+        res = res[idxs]
+        ts = ts[idxs]
 
     return (ts, res)
 
@@ -126,7 +137,7 @@ def plot_ode_solution(f, ic, c, slope_field_step, t_lim, y_lim, t_del=1e-3):
 
     ax.grid(True)
     plt.axis("equal")
-    plt.draw()
+    plt.plot()
 
 def plot_parameterized_phase_lines(f0, cs, y_lim):
     fig = plt.figure()
@@ -142,3 +153,40 @@ def plot_parameterized_phase_lines(f0, cs, y_lim):
         ax.scatter([c]*len(pl["zeros"]),pl["zeros"], color="black", zorder=2)
         ax.scatter([c]*len(pl["ups"]), pl["ups"], marker="^", color="green", zorder=2, s=40)
         ax.scatter([c]*len(pl["downs"]), pl["downs"], marker="v", color="red", zorder=2, s=40)
+
+def plot_solution_and_components(fs, ics, args, t_lim, y_lims,
+        t_del=0.01, plot_idx=[0,1]):
+    if type(ics) != list:
+        ics = [ics]
+
+    ph = 2
+    pv = math.ceil((len(ics)+1) / 2)
+
+    fig = plt.figure(figsize=(10,5*pv))
+
+
+    ax_plane = fig.add_subplot(pv, ph, 1)
+    ax_plane.grid(True)
+    ax_plane.set_xlim(y_lims[0])
+    ax_plane.set_ylim(y_lims[1])
+    ax_plane.set_xlabel("fs[{}]".format(plot_idx[0]))
+    ax_plane.set_ylabel("fs[{}]".format(plot_idx[1]))
+
+    for idx,ic in enumerate(ics):
+        ts, res = ode_solve(fs, ics[idx], t_lim, y_lims)
+
+        ax_plane.scatter(res[:,plot_idx[0]], res[:,plot_idx[1]],
+                         color=cols[idx], marker=".", s=1)
+
+        ax_comp = fig.add_subplot(pv, ph, idx+2)
+        ax_comp.grid(True)
+        ax_comp.plot(ts, res[:,plot_idx[0]], color=cols[idx], ls="-")
+        ax_comp.plot(ts, res[:,plot_idx[1]], color=cols[idx], ls="--")
+        ax_comp.set_xlim(t_lim)
+        ax_comp.set_ylim(y_lims[0])
+        ax_comp.set_ylabel("fs[{},{}]".format(*plot_idx))
+        ax_comp.set_xlabel("t")
+        ax_comp.legend(["fs[{}]".format(plot_idx[0]), "fs[{}]".format(plot_idx[1])])
+
+    plt.plot()
+    plt.show()
