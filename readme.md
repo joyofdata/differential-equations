@@ -19,7 +19,7 @@ plot_ode_solution(f1, ic=(1,-1), c=None,
 ```
 
 
-![png](output_1_0.png)
+![png](pics/output_1_0.png)
 
 
 
@@ -32,7 +32,7 @@ plot_ode_solution(f2, ic=(2,-3), c=None,
 ```
 
 
-![png](output_2_0.png)
+![png](pics/output_2_0.png)
 
 
 
@@ -51,11 +51,11 @@ plot_parameterized_phase_lines(f3, range(-10,10), (-5,5))
 
 
 
-![png](output_3_1.png)
+![png](pics/output_3_1.png)
 
 
 
-![png](output_3_2.png)
+![png](pics/output_3_2.png)
 
 
 
@@ -76,7 +76,7 @@ plot_solution_and_components(harmonic_oscillator,
 ```
 
 
-![png](output_4_0.png)
+![png](pics/output_4_0.png)
 
 
 
@@ -99,7 +99,7 @@ plot_solution_and_components(predator_prey,
 ```
 
 
-![png](output_5_0.png)
+![png](pics/output_5_0.png)
 
 
 
@@ -117,5 +117,5 @@ plot_solution_and_components(predator_prey2,
 ```
 
 
-![png](output_6_0.png)
+![png](pics/output_6_0.png)
 
