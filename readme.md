@@ -1,4 +1,7 @@
+[joyofdata.de](http://blog.joyofdata.de) / [@joyofdata](https://www.twitter.com/joyofdata) / Raffael Vogler
 
+---
+# Tool Set for Playing with ODEs
 
 ```python
 %matplotlib inline
